@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract BJKCOIN is ERC20, Ownable { 
+contract BJCOIN is ERC20, Ownable { 
     constructor() ERC20("BJKCOIN", "BJKC") Ownable(msg.sender) {
     }
 

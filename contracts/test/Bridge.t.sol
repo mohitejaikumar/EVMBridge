@@ -5,22 +5,22 @@ import "forge-std/Test.sol";
 
 import "../src/BridgeSepolia.sol";
 import "../src/BridgeHolesky.sol";
-import "../src/BJKCOIN.sol";
-import "../src/JKCOIN.sol";
+import "../src/BJCOIN.sol";
+import "../src/KJCOIN.sol";
 
 contract TestBridgeContract is Test {
-    BridgeSepolia c1;
-    BridgeHolesky c2;
-    BJKCOIN bridgeToken;
-    JKCOIN token;
+    BridgeContract c1;
+    Bridge c2;
+    BJCOIN bridgeToken;
+    KJCOIN token;
 
     address user = address(1);
 
     function setUp() public {
-        bridgeToken = new BJKCOIN();
-        token = new JKCOIN();
-        c1 = new BridgeSepolia(address(token));
-        c2 = new BridgeHolesky(address(bridgeToken));
+        bridgeToken = new BJCOIN();
+        token = new KJCOIN();
+        c1 = new BridgeContract(address(token));
+        c2 = new Bridge(address(bridgeToken));
         // transfer ownership to the BridgeGoerli contract
         bridgeToken.transferOwnership(address(c2));
     }
@@ -40,7 +40,7 @@ contract TestBridgeContract is Test {
         vm.stopPrank();
 
         // mint BJKCOIN token to the user
-        c2.mint(address(bridgeToken), user, 100 * 10 ** bridgeToken.decimals());
+        c2.mint(address(bridgeToken), user, 100 * 10 ** bridgeToken.decimals(),1);
         assertEq(c2.pendingBalances(user), 100 * 10 ** bridgeToken.decimals());
     }
 
@@ -55,7 +55,7 @@ contract TestBridgeContract is Test {
         vm.stopPrank();
 
         // mint BJKCOIN token to the user
-        c2.mint(address(bridgeToken), user, 100 * 10 ** bridgeToken.decimals());
+        c2.mint(address(bridgeToken), user, 100 * 10 ** bridgeToken.decimals(),1);
         assertEq(c2.pendingBalances(user), 100 * 10 ** bridgeToken.decimals());
         // burn the BJKCOIN token from the user
         vm.startPrank(user);
@@ -63,7 +63,7 @@ contract TestBridgeContract is Test {
         assertEq(c2.pendingBalances(user), 0);
         vm.stopPrank();
         // redeem the JKCOIN
-        c1.redeem(address(token), user, 100 * 10 ** token.decimals());
+        c1.redeem(address(token), user, 100 * 10 ** token.decimals(),1);
         assertEq(c1.pendingBalances(user), 0);
         assertEq(token.balanceOf(user), 1000 * 10 ** token.decimals());
     }
@@ -73,7 +73,7 @@ contract TestBridgeContract is Test {
         token.mint(user, 1000 * 10 ** token.decimals());
         
         vm.prank(user);
-        vm.expectRevert(BridgeSepolia.BridgeToken_Insufficient_Allowance.selector);
+        vm.expectRevert(BridgeContract.BridgeToken_Insufficient_Allowance.selector);
         c1.deposit(address(token), 200 * 10 ** token.decimals());
         
     }

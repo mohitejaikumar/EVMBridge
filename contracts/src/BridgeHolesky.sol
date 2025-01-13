@@ -6,29 +6,37 @@ import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20
 import {IBERC20} from "./IBERC20.sol";
 
 
-contract BridgeHolesky is Ownable{
+contract Bridge is Ownable{
     
     error BridgeToken_Transfer_Failed();
     error Invalid_Token_Address();
     error BridgeToken_Insufficient_Deposit();
+    error Invalid_Nonce();
 
     event Mint(address indexed, address indexed, uint256);
     event Burn(address indexed, address indexed, uint256);
 
     mapping(address => uint256) public pendingBalances;
     address public bridgeTokenAddress;
+
+    uint256 public nonce;
     
     constructor(address _tokenAddress) Ownable(_msgSender()) {
         bridgeTokenAddress = _tokenAddress;
     }
 
-    function mint(address _tokenAddress, address _to, uint256 _amount) external onlyOwner {
+    function mint(address _tokenAddress, address _to, uint256 _amount, uint256 _nonce) external onlyOwner {
         require(
             _tokenAddress == bridgeTokenAddress,
             Invalid_Token_Address()
         );
+        require(
+            _nonce == nonce + 1,
+            Invalid_Nonce()
+        );
         IBERC20(_tokenAddress).mint(_to, _amount);
         pendingBalances[_to] += _amount;
+        nonce++;
         emit Mint(_tokenAddress, _to, _amount);
     }
     

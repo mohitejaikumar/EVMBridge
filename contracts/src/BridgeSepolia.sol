@@ -7,18 +7,21 @@ import {IBERC20} from "./IBERC20.sol";
 
 
 
-contract BridgeSepolia is Ownable{
+contract BridgeContract is Ownable{
     
     error BridgeToken_Insufficient_Allowance();
     error BridgeToken_Transfer_Failed();
     error BridgeToken_Insufficient_Deposit();
     error Invalid_Token_Address();
+    error Invalid_Nonce();
 
     event Deposit(address indexed, address indexed, uint256);
     event Redeem(address indexed, address indexed, uint256);
 
     mapping(address => uint256) public pendingBalances;
     address public bridgeTokenAddress;
+
+    uint256 public nonce;
 
     constructor(address _tokenAddress) Ownable(_msgSender()) {
         bridgeTokenAddress = _tokenAddress;
@@ -41,10 +44,14 @@ contract BridgeSepolia is Ownable{
         emit Deposit(_tokenAddress, _msgSender(), _amount);
     }
     
-    function redeem(address _tokenAddress, address _to, uint256 _amount) external onlyOwner {
+    function redeem(address _tokenAddress, address _to, uint256 _amount, uint256 _nonce) external onlyOwner {
         require(
             _tokenAddress == bridgeTokenAddress,
             Invalid_Token_Address()
+        );
+        require(
+            _nonce == nonce + 1,
+            Invalid_Nonce()
         );
         require(
             pendingBalances[_to] >= _amount,
@@ -55,6 +62,7 @@ contract BridgeSepolia is Ownable{
             BridgeToken_Transfer_Failed()
         );
         pendingBalances[_to] -= _amount;
+        nonce++;
         emit Redeem(_tokenAddress, _to, _amount);
     }
 
