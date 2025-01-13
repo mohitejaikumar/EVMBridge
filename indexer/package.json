@@ -1,0 +1,20 @@
+{
+  "name": "indexer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc -b && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.5",
+    "prisma": "^6.2.1",
+    "tsc": "^2.0.4",
+    "typescript": "^5.7.3"
+  }
+}
