@@ -74,7 +74,7 @@ async function listenBridgeEvents(
     }
 
     if (networkStatus.lastProcessedBlock >= currentBlock) return;
-    
+
     console.log(
       "Processing block",
       networkStatus.lastProcessedBlock,
@@ -125,23 +125,6 @@ async function listenBridgeEvents(
     console.log(error);
   }
 }
-
-// // call every 10 seconds
-setInterval(() => {
-  listenBridgeEvents(
-    Network.SEPOLIA,
-    sepoliaProvider,
-    sepoliaBridgeContractInterface
-  );
-}, 10000);
-
-setInterval(() => {
-  listenBridgeEvents(
-    Network.HOLESKY,
-    holeskyProvider,
-    holeskyBridgeContractInterface
-  );
-}, 10000);
 
 async function processQueue(
   network: Network,
@@ -286,37 +269,66 @@ async function processOnOppositeSide(
   }
 }
 
-// async function main() {
-//   // approve this bridge contract 10 ETH
+// call every 10 seconds
+setInterval(() => {
+  listenBridgeEvents(
+    Network.SEPOLIA,
+    sepoliaProvider,
+    sepoliaBridgeContractInterface
+  );
+}, 10000);
 
-//   const wallet = new Wallet(WALLET_PRIVATE_KEY || "", sepoliaProvider);
-//   const tokenContractInstance = new Contract(
-//     KJCOIN_CONTRACT_ADDRESS,
-//     KJCOIN_ABI,
-//     wallet
-//   );
-//   const tx1 = await tokenContractInstance.approve(
-//     BRIDGE_CONTRACT_ADDRESS_SEPOLIA,
-//     parseEther("5")
-//   );
-//   await tx1.wait();
-//   console.log("approved 5 ETH");
+setInterval(() => {
+  listenBridgeEvents(
+    Network.HOLESKY,
+    holeskyProvider,
+    holeskyBridgeContractInterface
+  );
+}, 10000);
 
-//   const contractInstance = new Contract(
-//     BRIDGE_CONTRACT_ADDRESS_SEPOLIA,
-//     BRIDGE_CONTRACT_SEPOLIA_ABI,
-//     wallet
-//   );
-//   const tx2 = await contractInstance.deposit(
-//     KJCOIN_CONTRACT_ADDRESS,
-//     parseEther("5")
-//   );
-//   await tx2.wait();
-//   listenBridgeEvents(
-//     Network.SEPOLIA,
-//     sepoliaProvider,
-//     sepoliaBridgeContractInterface
-//   );
-// }
 
-// main();
+// helperFunctions
+async function burnBJCOIN() {
+  const wallet = new Wallet(WALLET_PRIVATE_KEY || "", holeskyProvider);
+  const contractInstance = new Contract(
+    BRIDGE_CONTRACT_ADDRESS_HOLESKY,
+    BRIDGE_CONTRACT_HOLESKY_ABI,
+    wallet
+  );
+  const tx2 = await contractInstance.burn(
+    BJCOIN_CONTRACT_ADDRESS,
+    parseEther("5")
+  );
+  console.log(tx2);
+  await tx2.wait();
+  console.log("burned 5 BJCOIN");
+}
+
+async function depositKJCOIN() {
+  const wallet = new Wallet(WALLET_PRIVATE_KEY || "", sepoliaProvider);
+  // approve this bridge contract 5 KJCOIN
+  const tokenContractInstance = new Contract(
+    KJCOIN_CONTRACT_ADDRESS,
+    KJCOIN_ABI,
+    wallet
+  );
+  const tx1 = await tokenContractInstance.approve(
+    BRIDGE_CONTRACT_ADDRESS_SEPOLIA,
+    parseEther("5")
+  );
+  await tx1.wait();
+
+  console.log("approved 5 KJCOIN");
+  // deposit 5 KJCOIN
+  const contractInstance = new Contract(
+    BRIDGE_CONTRACT_ADDRESS_SEPOLIA,
+    BRIDGE_CONTRACT_SEPOLIA_ABI,
+    wallet
+  );
+  const tx2 = await contractInstance.deposit(
+    KJCOIN_CONTRACT_ADDRESS,
+    parseEther("5")
+  );
+  await tx2.wait();
+  console.log(tx2);
+}
